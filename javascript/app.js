@@ -6,11 +6,11 @@ const carrito = [];
 alert(`Hola ${nombredelUsuario}, ¡comencemos a agregar productos a tu carrito!`);
 
 function agregarProducto() {
-        nombre = prompt("Ingrese el nombre del producto");
+        let nombre = prompt("Ingrese el nombre del producto");
         while (nombre === "" || nombre === null || !isNaN(nombre)) {
                 nombre = prompt("Ingrese un nombre válido");
         }
-        precio = parseInt(prompt("Ingrese el precio del producto"));
+        let precio = parseInt(prompt("Ingrese el precio del producto"));
         while (precio <= 0 || isNaN(precio)) {
                 precio = parseInt(prompt("Ingrese un precio válido"));
         }
