@@ -14,16 +14,23 @@ function agregarProducto() {
         while (precio <= 0 || isNaN(precio)) {
                 precio = parseInt(prompt("Ingrese un precio válido"));
         }
+        let cantidad = parseInt(prompt("Ingrese la cantidad del producto"));
+        while (cantidad <= 0 || isNaN(cantidad)) {
+                cantidad = parseInt(prompt("Ingrese una cantidad válida"));
+                precioFinal = precio * cantidad;
+        }
         return {
                 nombre: nombre,
-                precio: precio
+                precio: precio,
+                cantidad: cantidad,
+                precioFinal: precio * cantidad
         };
 }
 
 while (confirm("¿Desea agregar un producto al carrito?")) {
         const producto = agregarProducto();
         carrito.push(producto);
-        alert(`Producto agregado: ${producto.nombre} - Precio: $${producto.precio}`);
+        alert(`Producto agregado: ${producto.nombre} - Precio: $${producto.precio} - Cantidad: ${producto.cantidad}`);
 }
 mostrarCarrito();
 
@@ -35,8 +42,10 @@ function mostrarCarrito() {
                 let total = 0;
                 for (let i = 0; i < carrito.length; i++) {
                         listado += `Nombre: ${carrito[i].nombre}
-Precio: $${carrito[i].precio}\n`;
-total += carrito[i].precio;
+Precio: $${carrito[i].precio}
+Cantidad: ${carrito[i].cantidad}
+Total: $${carrito[i].precio * carrito[i].cantidad}\n -----------------------\n`;
+total += carrito[i].precio * carrito[i].cantidad;
         }
                 listado += `Total: $${total}\n`;
 }
