@@ -5,11 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Curso de JavaScript en Coderhouse">
     <meta name="keywords" content="JavaScript, Coderhouse, Curso">
-    <title>Curso JavaScript</title>
+    <title>JS Coderhouse</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>JS Coderhouse</h1>
+    <h1 class="h1Principal">Gestor de productos - DOM</h1>
+
+    <form id="productForm">
+        <div>
+            <label for="productName">Nombre del producto:</label>
+            <input type="text" id="productName" name="productName" required>
+        </div>
+        <div>
+            <label for="productPrice">Precio del producto:</label>
+            <input type="number" id="productPrice" name="productPrice" required>
+        </div>
+        <div>
+            <label for="productQuantity">Cantidad</label>
+            <input type="number" id="productQuantity" name="productQuantity" required>
+        </div>
+        <div>
+            <label for="productDescription">Descripción del producto</label>
+            <input type="text" id="productDescription">
+        </div>
+        <button type="submit">Agregar producto</button>
+    </form>
+
+    <div id="productsContainer"></div>
+
     <script src="javascript/app.js"></script>
 </body>
 </html>

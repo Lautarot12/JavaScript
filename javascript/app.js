@@ -1,73 +1,66 @@
-// Carrito
+let products = []
+let productId = 1
 
-alert ("Bienvenido al carrito de compras");
-const nombredelUsuario = prompt("Ingrese su nombre");
-const carrito = [];
-alert(`Hola ${nombredelUsuario}, ¡comencemos a agregar productos a tu carrito!`);
+const form = document.getElementById('productForm')
+const container = document.getElementById('productsContainer')
 
-function agregarProducto() {
-        let nombre = prompt("Ingrese el nombre del producto");
-        while (nombre === "" || nombre === null || !isNaN(nombre)) {
-                nombre = prompt("Ingrese un nombre válido");
-        }
-        let precio = parseInt(prompt("Ingrese el precio del producto"));
-        while (precio <= 0 || isNaN(precio)) {
-                precio = parseInt(prompt("Ingrese un precio válido"));
-        }
-        let cantidad = parseInt(prompt("Ingrese la cantidad del producto"));
-        while (cantidad <= 0 || isNaN(cantidad)) {
-                cantidad = parseInt(prompt("Ingrese una cantidad válida"));
-                precioFinal = precio * cantidad;
-        }
-        return {
-                nombre: nombre,
-                precio: precio,
-                cantidad: cantidad,
-                precioFinal: precio * cantidad
-        };
+const savedProducts = JSON.parse(localStorage.getItem("products"))
+if (savedProducts) {
+        products = savedProducts
+        productId = products.length > 0 ? products[products.length - 1].id + 1 : 1
+        renderProducts()
 }
 
-while (confirm("¿Desea agregar un producto al carrito?")) {
-        const producto = agregarProducto();
-        carrito.push(producto);
-        alert(`Producto agregado: ${producto.nombre} - Precio: $${producto.precio} - Cantidad: ${producto.cantidad}`);
-}
-mostrarCarrito();
-
-function mostrarCarrito() {
-        let listado = 'Carrito de compras:\n';
-        if (carrito.length === 0) {
-                listado += 'El carrito está vacío.';
-        } else {
-                let total = 0;
-                for (let i = 0; i < carrito.length; i++) {
-                        listado += `Nombre: ${carrito[i].nombre}
-Precio: $${carrito[i].precio}
-Cantidad: ${carrito[i].cantidad}
-Total: $${carrito[i].precio * carrito[i].cantidad}\n -----------------------\n`;
-total += carrito[i].precio * carrito[i].cantidad;
-        }
-                listado += `Total: $${total}\n`;
-}
-return alert(listado)
-}
-
-while (confirm("¿Desea eliminar un producto del carrito?")) {
-        eliminarProducto();
-}
-
-function eliminarProducto() {
-        const nombreProducto = prompt("Ingrese el nombre del producto a eliminar");
-        for (let i = 0; i < carrito.length; i++) {
-                if (carrito[i].nombre.toLowerCase() === nombreProducto.toLowerCase()) {
-                        carrito.splice(i, 1);
-                        alert(`El producto ${nombreProducto} ha sido eliminado del carrito.`);
-                        mostrarCarrito();
-                        return;
-                }
-        }
-        console.log(`El producto ${nombreProducto} no se encuentra en el carrito.`);
+form.addEventListener("submit", function(event){
+        event.preventDefault()
+        const name = document.getElementById("productName").value
+        const price = document.getElementById("productPrice").value
+        const description = document.getElementById("productDescription").value
+        const quantity = document.getElementById("productQuantity").value
         
+        const product = {
+                id: productId++,
+                name: name,
+                price: price,
+                quantity: quantity,
+                description: description,
+        }
+
+        products.push(product)
+        localStorage.setItem("products", JSON.stringify(products))
+        renderProducts()
+form.reset()
+});
+
+
+function renderProducts() {
+        container.innerHTML = ""
+        products.forEach((product) => {
+                const productDiv = document.createElement("div")
+                const productInfo = document.createElement("div")
+                productInfo.innerHTML = `<h3>${product.name}</h3>
+                                        <p>Precio: $${product.price}</p>
+                                        <p>Cantidad: ${product.quantity}</p>
+                                        <p>Descripción: ${product.description}</p>
+                                        <p>Total: ${product.price * product.quantity}</p>`
+
+                const deleteButton = document.createElement("button")
+                deleteButton.textContent = "Eliminar producto"
+                deleteButton.addEventListener("click", () => deleteProduct(product.id))
+
+                const displayTotalPrice = document.createElement("div")
+                const TotalPrice = products.reduce((acc, prod) => acc + (prod.price * prod.quantity), 0);
+                displayTotalPrice.innerHTML = `<h4>Total de los productos: $${TotalPrice}</h4>`
+
+                productDiv.appendChild(productInfo)
+                productDiv.appendChild(displayTotalPrice)
+                productDiv.appendChild(deleteButton)
+                container.appendChild(productDiv)
+        });
 }
 
-mostrarCarrito();
+function deleteProduct(id) {
+        products = products.filter((product) => product.id !== id)
+        localStorage.setItem("products", JSON.stringify(products))
+        renderProducts()
+}
