@@ -11,6 +11,13 @@ if (savedProducts) {
         renderProducts()
 }
 
+document.getElementById("clearAll").addEventListener("click", () => {
+        products = []
+        container.innerHTML = ""
+        localStorage.removeItem("products")
+        productId = 1
+})
+
 form.addEventListener("submit", function(event){
         event.preventDefault()
         const name = document.getElementById("productName").value
@@ -64,3 +71,4 @@ function deleteProduct(id) {
         localStorage.setItem("products", JSON.stringify(products))
         renderProducts()
 }
+
