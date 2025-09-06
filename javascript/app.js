@@ -37,7 +37,7 @@ form.addEventListener("submit", function(event){
         localStorage.setItem("products", JSON.stringify(products))
         renderProducts()
 form.reset()
-});
+})
 
 
 function renderProducts() {
@@ -63,7 +63,7 @@ function renderProducts() {
                 productDiv.appendChild(displayTotalPrice)
                 productDiv.appendChild(deleteButton)
                 container.appendChild(productDiv)
-        });
+        })
 }
 
 function deleteProduct(id) {
@@ -71,4 +71,6 @@ function deleteProduct(id) {
         localStorage.setItem("products", JSON.stringify(products))
         renderProducts()
 }
+
+
 
