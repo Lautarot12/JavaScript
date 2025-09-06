@@ -20,7 +20,7 @@ document.getElementById("clearAll").addEventListener("click", () => {
 
 form.addEventListener("submit", function(event){
         event.preventDefault()
-        const name = document.getElementById("productName").value
+        const name = document.getElementById("productName").value.toUpperCase()
         const price = document.getElementById("productPrice").value
         const description = document.getElementById("productDescription").value
         const quantity = document.getElementById("productQuantity").value
