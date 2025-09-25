@@ -7,6 +7,6 @@
    - **Cantidad invertida:** Cuánto dinero invertiste en USD.
 3. Hacer click en **Agregar**.
 4. Ver tus inversiones en la lista, con ganancia/pérdida calculada en tiempo real.
-5. Borrar un asset usando el botón rojo correspondiente.
+5. Borrar un asset usando el botón correspondiente.
 
 > ⚠️ Recuerda escribir los nombres de las criptomonedas exactamente como se indica para que la API funcione correctamente.
