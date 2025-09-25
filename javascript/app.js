@@ -1,76 +1,102 @@
-let products = []
-let productId = 1
+// Portfolio de Criptomonedas
 
-const form = document.getElementById('productForm')
-const container = document.getElementById('productsContainer')
+const portfolio = JSON.parse(localStorage.getItem('portfolio')) || []
 
-const savedProducts = JSON.parse(localStorage.getItem("products"))
-if (savedProducts) {
-        products = savedProducts
-        productId = products.length > 0 ? products[products.length - 1].id + 1 : 1
-        renderProducts()
+const form = document.getElementById('addCryptoForm')
+
+form.addEventListener('submit', function (event) {
+
+        event.preventDefault()
+
+        const cryptoNameInput = document.getElementById('cryptoName').value.toLowerCase()
+        const cryptoBuyPrice = parseFloat(document.getElementById('cryptoPrice').value)
+        const cryptoUSD = parseFloat(document.getElementById('cryptoUSD').value)
+
+        const validNames = ['bitcoin', 'ethereum', 'solana', 'binancecoin']
+        if (
+        !validNames.includes(cryptoNameInput) ||
+        isNaN(cryptoUSD) ||
+        isNaN(cryptoBuyPrice) ||
+        cryptoUSD <= 0 ||
+        cryptoBuyPrice <= 0
+) {
+        alert(
+                'Por favor, ingrese datos válidos.\nNombres válidos: bitcoin, ethereum, solana, binancecoin'
+        )
+        return
 }
 
-document.getElementById("clearAll").addEventListener("click", () => {
-        products = []
-        container.innerHTML = ""
-        localStorage.removeItem("products")
-        productId = 1
+const amount = cryptoUSD / cryptoBuyPrice
+
+portfolio.push({
+        name: cryptoNameInput,
+        amount: amount,
+        buyPrice: cryptoBuyPrice
 })
 
-form.addEventListener("submit", function(event){
-        event.preventDefault()
-        const name = document.getElementById("productName").value.toUpperCase()
-        const price = document.getElementById("productPrice").value
-        const description = document.getElementById("productDescription").value
-        const quantity = document.getElementById("productQuantity").value
-        
-        const product = {
-                id: productId++,
-                name: name,
-                price: price,
-                quantity: quantity,
-                description: description,
-        }
+localStorage.setItem('portfolio', JSON.stringify(portfolio))
 
-        products.push(product)
-        localStorage.setItem("products", JSON.stringify(products))
-        renderProducts()
+ObtenerCriptoPrices()
 form.reset()
 })
 
+async function ObtenerCriptoPrices() {
+        const response = await fetch(
+                'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd'
+)
+const data = await response.json()
 
-function renderProducts() {
-        container.innerHTML = ""
-        products.forEach((product) => {
-                const productDiv = document.createElement("div")
-                const productInfo = document.createElement("div")
-                productInfo.innerHTML = `<h3>${product.name}</h3>
-                                        <p>Precio: $${product.price}</p>
-                                        <p>Cantidad: ${product.quantity}</p>
-                                        <p>Descripción: ${product.description}</p>
-                                        <p>Total: ${product.price * product.quantity}</p>`
+const portfolioDiv = document.getElementById('portfolio')
+portfolioDiv.innerHTML = ''
 
-                const deleteButton = document.createElement("button")
-                deleteButton.textContent = "Eliminar producto"
-                deleteButton.addEventListener("click", () => deleteProduct(product.id))
+let totalInvested = 0
+let totalCurrent = 0
 
-                const displayTotalPrice = document.createElement("div")
-                const TotalPrice = products.reduce((acc, prod) => acc + (prod.price * prod.quantity), 0);
-                displayTotalPrice.innerHTML = `<h4>Total de los productos: $${TotalPrice}</h4>`
+portfolio.forEach((crypto, index) => {
+        const currentPrice = data[crypto.name].usd
+        const currentValue = crypto.amount * currentPrice
+        const invested = crypto.amount * crypto.buyPrice
+        const profit = currentValue - invested
 
-                productDiv.appendChild(productInfo)
-                productDiv.appendChild(displayTotalPrice)
-                productDiv.appendChild(deleteButton)
-                container.appendChild(productDiv)
+        totalInvested += invested
+        totalCurrent += currentValue
+
+        const div = document.createElement('div')
+        div.className = 'asset'
+        div.innerHTML = `
+            <div>${crypto.name.toUpperCase()}</div>
+            <div>Cantidad: ${crypto.amount.toFixed(6)}</div>
+            <div>Precio Compra: $${crypto.buyPrice.toFixed(2)}</div>
+            <div>Precio Actual: $${currentPrice.toFixed(2)}</div>
+            <div class="profit ${
+                profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'neutral'
+            }">Ganancia/Pérdida: $${profit.toFixed(2)}</div>
+            <button class="delete">Borrar</button>
+        `
+
+        div.querySelector('.delete').addEventListener('click', () => {
+                portfolio.splice(index, 1)
+                localStorage.setItem('portfolio', JSON.stringify(portfolio))
+                ObtenerCriptoPrices()
         })
+
+        portfolioDiv.appendChild(div)
+})
+
+    // Mostrar totales
+const totalDiv = document.createElement('div')
+totalDiv.className = 'asset'
+const totalProfit = totalCurrent - totalInvested
+totalDiv.innerHTML = `
+        <div><strong>Total Invertido:</strong> $${totalInvested.toFixed(2)}</div>
+        <div><strong>Valor Actual:</strong> $${totalCurrent.toFixed(2)}</div>
+        <div class="profit ${totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : 'neutral'}">
+            <strong>Ganancia/Pérdida Total:</strong> $${totalProfit.toFixed(2)}
+        </div>
+    `
+portfolioDiv.appendChild(totalDiv)
 }
 
-function deleteProduct(id) {
-        products = products.filter((product) => product.id !== id)
-        localStorage.setItem("products", JSON.stringify(products))
-        renderProducts()
-}
-
-
-
+// Inicializar al cargar la página
+ObtenerCriptoPrices()
+setInterval(ObtenerCriptoPrices, 10000)
