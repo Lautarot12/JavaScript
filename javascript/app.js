@@ -5,7 +5,6 @@ const portfolio = JSON.parse(localStorage.getItem('portfolio')) || []
 const form = document.getElementById('addCryptoForm')
 
 form.addEventListener('submit', function (event) {
-
         event.preventDefault()
 
         const cryptoNameInput = document.getElementById('cryptoName').value.toLowerCase()
@@ -13,46 +12,55 @@ form.addEventListener('submit', function (event) {
         const cryptoUSD = parseFloat(document.getElementById('cryptoUSD').value)
 
         const validNames = ['bitcoin', 'ethereum', 'solana', 'binancecoin']
+
         if (
-        !validNames.includes(cryptoNameInput) ||
-        isNaN(cryptoUSD) ||
-        isNaN(cryptoBuyPrice) ||
-        cryptoUSD <= 0 ||
-        cryptoBuyPrice <= 0
-) {
-        alert(
-                'Por favor, ingrese datos válidos.\nNombres válidos: bitcoin, ethereum, solana, binancecoin'
-        )
+                !validNames.includes(cryptoNameInput) ||
+                isNaN(cryptoUSD) ||
+                isNaN(cryptoBuyPrice) ||
+                cryptoUSD <= 0 ||
+                cryptoBuyPrice <= 0
+        ) {
+                Swal.fire({
+                        icon: 'error',
+                title: 'Datos inválidos',
+                html: 'Por favor, ingrese datos válidos.<br><strong>Nombres válidos:</strong> bitcoin, ethereum, solana, binancecoin'
+        })
         return
 }
 
-const amount = cryptoUSD / cryptoBuyPrice
+    const amount = cryptoUSD / cryptoBuyPrice
 
-portfolio.push({
+    portfolio.push({
         name: cryptoNameInput,
         amount: amount,
         buyPrice: cryptoBuyPrice
-})
+    })
 
-localStorage.setItem('portfolio', JSON.stringify(portfolio))
+    localStorage.setItem('portfolio', JSON.stringify(portfolio))
 
-ObtenerCriptoPrices()
-form.reset()
+    Swal.fire({
+        icon: 'success',
+        title: '¡Cripto agregada!',
+        text: `${cryptoNameInput.toUpperCase()} se agregó correctamente a tu portafolio.`
+    })
+
+    ObtenerCriptoPrices()
+    form.reset()
 })
 
 async function ObtenerCriptoPrices() {
-        const response = await fetch(
-                'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd'
-)
-const data = await response.json()
+    const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd'
+    )
+    const data = await response.json()
 
-const portfolioDiv = document.getElementById('portfolio')
-portfolioDiv.innerHTML = ''
+    const portfolioDiv = document.getElementById('portfolio')
+    portfolioDiv.innerHTML = ''
 
-let totalInvested = 0
-let totalCurrent = 0
+    let totalInvested = 0
+    let totalCurrent = 0
 
-portfolio.forEach((crypto, index) => {
+    portfolio.forEach((crypto, index) => {
         const currentPrice = data[crypto.name].usd
         const currentValue = crypto.amount * currentPrice
         const invested = crypto.amount * crypto.buyPrice
@@ -75,26 +83,47 @@ portfolio.forEach((crypto, index) => {
         `
 
         div.querySelector('.delete').addEventListener('click', () => {
-                portfolio.splice(index, 1)
-                localStorage.setItem('portfolio', JSON.stringify(portfolio))
-                ObtenerCriptoPrices()
+                Swal.fire({
+                        title: '¿Eliminar activo?',
+                        text: `¿Seguro que querés eliminar ${crypto.name.toUpperCase()} de tu portafolio?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, borrar',
+                        cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                        portfolio.splice(index, 1)
+                        localStorage.setItem('portfolio', JSON.stringify(portfolio))
+                         ObtenerCriptoPrices()
+
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Activo eliminado',
+                        text: `${crypto.name.toUpperCase()} fue eliminado de tu portafolio.`
+                    })
+                }
+            })
         })
 
         portfolioDiv.appendChild(div)
-})
+    })
 
     // Mostrar totales
-const totalDiv = document.createElement('div')
-totalDiv.className = 'asset'
-const totalProfit = totalCurrent - totalInvested
-totalDiv.innerHTML = `
+    const totalDiv = document.createElement('div')
+    totalDiv.className = 'asset'
+    const totalProfit = totalCurrent - totalInvested
+    totalDiv.innerHTML = `
         <div><strong>Total Invertido:</strong> $${totalInvested.toFixed(2)}</div>
         <div><strong>Valor Actual:</strong> $${totalCurrent.toFixed(2)}</div>
-        <div class="profit ${totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : 'neutral'}">
-            <strong>Ganancia/Pérdida Total:</strong> $${totalProfit.toFixed(2)}
+        <div class="profit ${
+                totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : 'neutral'
+        }">
+        <strong>Ganancia/Pérdida Total:</strong> $${totalProfit.toFixed(2)}
         </div>
     `
-portfolioDiv.appendChild(totalDiv)
+    portfolioDiv.appendChild(totalDiv)
 }
 
 // Inicializar al cargar la página
